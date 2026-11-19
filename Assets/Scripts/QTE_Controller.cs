@@ -30,6 +30,8 @@ public class QTE_Controller : MonoBehaviour
         None
     }
 
+    public bool QTE_Active = false;
+
     public DifficultyLevel gameMode;
 
     [Header("Target Size")]
@@ -56,6 +58,8 @@ public class QTE_Controller : MonoBehaviour
     public TMP_Text AttemptsText;
     public TMP_Text CatchText;
     public TMP_Text AttemptsTillCompleteText;
+    public GameObject QTE_Objects;
+    public GameObject QTE_Canvas;
 
     void Awake()
     {
@@ -77,10 +81,19 @@ public class QTE_Controller : MonoBehaviour
 
         qteFinished = false;
         SuccessfulQTE = false;
+
+        QTE_Active = false;
     }
 
     void Update()
     {
+
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            StopQTEDebug();
+        }
+
+        if (QTE_Active == true){
         if (!qteFinished)
         {
             if (Input.GetKeyDown(KeyCode.Space) &&
@@ -112,6 +125,8 @@ public class QTE_Controller : MonoBehaviour
                 }
             }
         }
+
+        
 
         if (gameMode == DifficultyLevel.Easy)
         {
@@ -176,11 +191,13 @@ public class QTE_Controller : MonoBehaviour
         AttemptsText.text = SuccessAttempts.ToString();
         CatchText.text = CatchTimer.ToString("0.00");
         AttemptsTillCompleteText.text = AttemptsTillComplete.ToString();
+
+        }
     }
 
     void FixedUpdate()
     {
-        if (qteFinished)
+        if (!QTE_Active || qteFinished)
             return;
 
         float halfWidth = myCollider.bounds.extents.x;
@@ -310,4 +327,74 @@ public class QTE_Controller : MonoBehaviour
 
         speed = 0f;
     }
+
+    public void StopQTEDebug()
+    {
+        Debug.Log("QTE Disabled");
+        QTE_Active = false;
+        qteFinished = true;
+
+        speed = 0f;
+        if (rb != null)
+        {
+            rb.velocity = Vector2.zero;
+        }
+
+        if (QTE_Objects != null)
+            QTE_Objects.SetActive(false);
+        if (QTE_Canvas != null)
+            QTE_Canvas.SetActive(false);
+    }
+
+    public void ToggleQTEDebug()
+    {
+        if (QTE_Active)
+        {
+            QTE_Active = false;
+            qteFinished = true;
+            speed = 0f;
+
+            if (rb != null)
+            {
+                rb.velocity = Vector2.zero;
+            }
+
+            if (QTE_Objects != null)
+                QTE_Objects.SetActive(false);
+            if (QTE_Canvas != null)
+                QTE_Canvas.SetActive(false);
+            
+            Debug.Log("QTE Disabled");
+        }
+        else
+        {
+            if (QTE_Objects != null)
+                QTE_Objects.SetActive(true);
+            if (QTE_Canvas != null)
+                QTE_Canvas.SetActive(true);
+
+            ResetQTE();
+
+            QTE_Active = true;
+            Debug.Log("QTE Enabled");
+        }
+    }
+
+    
+    public void SetQTEActive(bool active)
+    {
+        QTE_Active = active;
+
+        if (QTE_Objects != null)
+            QTE_Objects.SetActive(active);
+
+        if (QTE_Canvas != null)
+            QTE_Canvas.SetActive(active);
+
+        if (active)
+        {
+            ResetQTE();
+        }
+    }
+
 }
